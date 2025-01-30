@@ -5,8 +5,11 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
+import "../global.css"
+import React from 'react';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
+import ReactQueryProvider from '@/react-query/ReactQueryProvider';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -28,12 +31,21 @@ export default function RootLayout() {
   }
 
   return (
+    <>
+
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <ReactQueryProvider>
+
       <Stack>
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="auth/login" options={{ headerShown: false }} />
+            <Stack.Screen name="auth/register" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
+        </ReactQueryProvider>
     </ThemeProvider>
+    </>
   );
 }
