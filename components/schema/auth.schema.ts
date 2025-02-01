@@ -28,15 +28,12 @@ export const registerSchema = z
         "Phone number must be a valid Ethiopian phone number"
       )
       .nonempty("Phone number is required"),
-    dateOfBirth: z
-      .string()
-      .refine((date) => !isNaN(Date.parse(date)), "Invalid date format")
-      .refine(
-        (date) => new Date(date) <= new Date(),
-        "Date of birth cannot be in the future"
-      ),
+    age:  z
+      .number()
+      .default(22) , 
+    allergies:z.array(z.number()).optional()
   })
-  .refine((data) => data.password != data.confirmPassword, {
+  .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
   });

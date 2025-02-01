@@ -41,7 +41,7 @@ export function useFetchQuery<TData = any>(
   queryOptions?: UseQueryOptions<TData>
 ) {
   const axiosInstance = axios.create({
-    baseURL: "http://10.9.212.208:3001", // Fixed base URL
+    baseURL: "http://192.168.168.194:3001", // Fixed base URL
   });
 
   // Construct the full URL with query parameters

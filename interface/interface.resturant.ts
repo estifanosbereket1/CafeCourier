@@ -12,9 +12,10 @@ interface IRestaurant {
   createdAt: Date;
   updatedAt: Date;
   address: string;
-  menuItems?: MenuItem[];
-  images?: RestaurantImage[];
-  orders?: Order[];
+  menuItems?: any;
+  images?: any;
+  orders?: any;
+  imageUrl:string
 }
 
 interface MenuItem {

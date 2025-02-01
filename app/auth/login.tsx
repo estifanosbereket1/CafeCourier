@@ -1,10 +1,15 @@
 import { View, Text, KeyboardAvoidingView, Platform, ScrollView, Image, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Link, useRouter } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { ParamListBase, RouteProp, useRoute } from '@react-navigation/native';
+import { useSignIn } from '@/api/api.auth';
+import { useDispatch } from 'react-redux';
+import { setUser } from '@/redux/slices/authSlice';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
@@ -29,6 +34,72 @@ const login = () => {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const router = useRouter();
+    const route: RouteProp<ParamListBase> & { params: { email?: string, password?:string } } = useRoute();
+
+   const {email, password}=route.params
+
+
+
+        const {mutate:createMutate, isPending:createLoading, isSuccess:createSuceess}= useSignIn();
+    
+        const isLoading = useMemo(
+            () => createLoading,
+            [createLoading,]
+        );
+        const dispatch = useDispatch()
+    const isSuccess= useMemo(()=>createSuceess, [createSuceess])
+
+    let dataToDispatch:any;
+    
+    useEffect(()=>{
+        if(isSuccess){
+            router.push('/(tabs)/home');
+
+            console.log(dataToDispatch, "llllllllll")
+            
+            dispatch(setUser(dataToDispatch))
+        }
+    }, [isSuccess])
+    
+    
+
+
+    const handleSubmitAccount = async (data: any) => {
+        try {
+            const response:any =  createMutate(data);
+            console.log("✅ Response in handleSubmitAccount:", response, typeof response);
+            dispatch(setUser(response?.user))
+            console.log("i am here")
+        } catch (error: any) {
+            console.error("❌ Error in handleSubmitAccount:", error.response?.data || error.message);
+        }
+    };
+
+
+    // const handleSubmitAccount = async (data: any) => {
+    //     try {
+    //         const response: any = await createMutate(data);
+    //         console.log("✅ Response in handleSubmitAccount:", response);
+
+    //         // Dispatch the user object to Redux
+    //         if (response?.user) {
+    //             dispatch(setUser(response.user)); // Dispatch user data to the store
+    //             console.log("User dispatched:", response.user); // Log dispatched user data
+    //             await AsyncStorage.setItem('user', JSON.stringify(response?.user));
+    //             await AsyncStorage.setItem('accessToken', response?.accessTokenObj?.accessToken);
+    //         }
+
+    //         // Optionally, handle the navigation to home
+    //         router.push('/(tabs)/home');
+
+    //     } catch (error: any) {
+    //         console.error("❌ Error in handleSubmitAccount:", error.response?.data || error.message);
+    //     }
+    // };
+
+
+   console.log(email, typeof email)
+
     const togglePasswordVisibility = () => {
         setIsPasswordVisible(!isPasswordVisible);
     };
@@ -36,6 +107,7 @@ const login = () => {
         control,
         handleSubmit,
         formState: { errors },
+        setValue
     } = useForm({
         resolver: yupResolver(schema),
         defaultValues: {
@@ -43,6 +115,15 @@ const login = () => {
             password: "",
         },
     });
+
+    useEffect(()=>{
+        if(email && password){
+setValue("email", email);
+setValue("password", password)
+        }
+    }, [])
+
+
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -139,7 +220,7 @@ const login = () => {
                                 <TouchableOpacity
                                     className={`w-full py-4 px-8 rounded-lg mt-3 ${isSubmitting ? "bg-gray-400" : "bg-[#F56606]"
                                         }`}
-                                    onPress={() => router.replace("/(tabs)/home")}
+                                    onPress={handleSubmit(handleSubmitAccount)}
                                     disabled={isSubmitting}
                                 >
                                     {isSubmitting ? (

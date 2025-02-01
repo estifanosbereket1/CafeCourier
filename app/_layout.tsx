@@ -8,8 +8,14 @@ import 'react-native-reanimated';
 import "../global.css"
 import React from 'react';
 
+import theme from '@/components/theme';
+
 import { useColorScheme } from '@/hooks/useColorScheme';
 import ReactQueryProvider from '@/react-query/ReactQueryProvider';
+import { Provider } from 'react-redux';
+import store, { persistor } from '@/redux/store';
+import { PersistGate } from 'redux-persist/integration/react';
+import { PaperProvider } from 'react-native-paper';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -32,8 +38,13 @@ export default function RootLayout() {
 
   return (
     <>
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
 
+
+          <PaperProvider theme={theme}>
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+
         <ReactQueryProvider>
 
       <Stack>
@@ -46,6 +57,12 @@ export default function RootLayout() {
       <StatusBar style="auto" />
         </ReactQueryProvider>
     </ThemeProvider>
+          </PaperProvider>
+
+        </PersistGate>
+
+      </Provider>
+
     </>
   );
 }

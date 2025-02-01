@@ -1,6 +1,6 @@
 const endpoints = {
   SIGNUP: "/auth/signup",
-  SINGIN: "/aith/signin",
+  SINGIN: "/auth/signin",
   RESTURANTS: "/resturant",
   ORDERS: "/orders",
   MENUITEMS: "/menuitems",

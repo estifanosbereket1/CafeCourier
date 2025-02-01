@@ -1,7 +1,7 @@
 import { View, Text, KeyboardAvoidingView, Platform, ScrollView, Image, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Link, useRouter } from 'expo-router';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as yup from "yup";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,9 +10,7 @@ import z from "zod"
 import DateTimePicker from 'react-native-ui-datepicker';
 import { Chip } from 'react-native-paper';
 import AllergySelector from '@/components/ChipTest';
-
-
-
+import { useCreateAccount } from '@/api/api.auth';
 
 
 const register = () => {
@@ -29,9 +27,45 @@ const register = () => {
         control,
         handleSubmit,
         formState: { errors },
+        getValues
     } = useForm<FormValues>({
         resolver: zodResolver(registerSchema),
     });
+    // const AllergyArray = useFieldArray({control:control, name:"allergy"})
+
+    const {mutate:createMutate, isPending:createLoading, isSuccess:createSuceess}= useCreateAccount();
+
+    const isLoading = useMemo(
+        () => createLoading,
+        [createLoading,]
+    );
+const isSuccess= useMemo(()=>createSuceess, [createSuceess])
+
+useEffect(()=>{
+    if(isSuccess){
+        router.push({
+            pathname: "/auth/login",
+            params: {
+                email: JSON.stringify(getValues("email")),
+                password: JSON.stringify(getValues("password"))
+            }
+        })
+    }
+}, [isSuccess])
+
+
+
+    const handleSubmitAccount = async (data: any) => {
+        delete data?.confirmPassword
+        console.log(data)
+        createMutate({
+            ...data,
+        });
+        console.log(createSuceess)
+        
+       
+    };
+
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -81,7 +115,7 @@ const register = () => {
                             </View>
 
 
-                            <View className="flex flex-col gap-[10px] mt-10">
+                            <View className="flex flex-col gap-[10px] mt-2">
                                 <Text className="font-semibold text-sm leading-6 text-[#333333]">
                                     Last Name <Text className="text-red-500">*</Text>
                                 </Text>
@@ -107,7 +141,7 @@ const register = () => {
                                 )}
                             </View>
 
-                            <View className="flex flex-col gap-[10px] mt-10">
+                            <View className="flex flex-col gap-[10px] mt-2">
                                 <Text className="font-semibold text-sm leading-6 text-[#333333]">
                                     Email <Text className="text-red-500">*</Text>
                                 </Text>
@@ -133,7 +167,7 @@ const register = () => {
                                 )}
                             </View>
 
-                            <View className="flex flex-col gap-[10px] mt-10">
+                            <View className="flex flex-col gap-[10px] mt-2">
                                 <Text className="font-semibold text-sm leading-6 text-[#333333]">
                                     Phone Number <Text className="text-red-500">*</Text>
                                 </Text>
@@ -158,7 +192,7 @@ const register = () => {
                                 )}
                             </View>
 
-                            <View className="flex flex-col gap-[10px] mt-10">
+                            {/* <View className="flex flex-col gap-[10px] mt-10">
                                 <Text className="font-semibold text-sm leading-6 text-[#333333]">
                                     Birth Date <Text className="text-red-500">*</Text>
                                 </Text>
@@ -187,7 +221,7 @@ const register = () => {
                                         {errors.dateOfBirth.message}
                                     </Text>
                                 )}
-                            </View>
+                            </View> */}
 
 
 
@@ -275,16 +309,14 @@ const register = () => {
                                 </Text>
                             )}
 
-                            <AllergySelector />
+                            <AllergySelector control={control} />
 
-                            {/* <Chip icon="information" onPress={() => console.log('Pressed')}>Example Chip</Chip> */}
 
                             <View>
                                 <TouchableOpacity
                                     className={`w-full py-4 px-8 rounded-lg mt-3 ${isSubmitting ? "bg-gray-400" : "bg-[#F56606]"
                                         }`}
-                                    onPress={() => router.replace("/(tabs)/home")}
-                                    // onPress={handleSubmit(onSubmit)}
+                                    onPress={handleSubmit(handleSubmitAccount)}
                                     disabled={isSubmitting}
                                 >
                                     {isSubmitting ? (

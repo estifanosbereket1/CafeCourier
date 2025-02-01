@@ -1,5 +1,6 @@
 import { useFetchQuery, usePagination } from "@/hooks/common.hook";
 import endpoints from "@/utils/endpoints";
+import { useMemo } from "react";
 
 export const useFetchResturants = (
   page: number,
@@ -20,10 +21,23 @@ export const useFetchResturants = (
   );
 };
 
-export const useAllergypagination = (queryParams?: Record<string, any>) => {
+export const useResturantPagination = (queryParams?: Record<string, any>) => {
   return usePagination(
     endpoints.RESTURANTS,
     ["resturant", "total"],
     queryParams
+  );
+};
+
+export const useFetchViewResturant = (id?: string) => {
+  const enabled = useMemo(() => (id ? true : false), [id]);
+  return useFetchQuery<any>(
+    endpoints.RESTURANTS + `/view/${id}`,
+    ["resturant-view", id],
+    {},
+    {
+      enabled,
+      queryKey: ["resturant-view", id],
+    }
   );
 };
